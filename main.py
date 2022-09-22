@@ -105,6 +105,57 @@ def button_clicked_2():
     plotWidget.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
     plotWidget2.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
 
+def get_a_implicit(k, c, alpha, I, l):
+    a = np.arange(0, I, dtype=float)
+    h_z=l/I
+    for i in range(0, I-1):
+        a[i]=-k/(c*h_z**2)
+    a[I-1]=-k/(alpha*h_z**2)
+    return a
+
+def get_b_implicit(k, c, alpha, I, l):
+    b = np.arange(0, I, dtype=float)
+    h_z=l/I
+    for i in range(1, I):
+        b[i]=-k/(c*h_z**2)
+    b[0]=-k/(alpha*h_z**2)
+    return b
+
+def get_c_implicit(k, c, alpha, I, l, T, K):
+    c = np.arange(0, I+1, dtype=float)
+    h_z=l/I
+    h_t=T/K
+    c[0]=1-k/(alpha*h_z)
+    for i in range(1, I):
+        c[i]=1/h_t+2*k/(c*h_z**2)
+    c[I]=1+k/(alpha*h_z)
+    return c
+
+def get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1):
+    f = np.arange(0, I+1, dtype=float)
+    h_t=T/K
+    f[0]=u_0
+    phi = get_phi(c, R, beta, p, a, I, l)
+    for i in range(1, I):
+        f[i]=phi[i]+u_k_minus_1/h_t
+    c[I]=1+k/(alpha*h_z)
+    return c
+
+def get_phi(c, R, beta, p, a, I, l):
+    integral = 0
+    z = np.arange(0, l, l/I)
+    for i in range(1001):
+        r = i/1000*R
+        integral+=p*np.exp(-(r/a)**2)/2/a**2*r
+    return 2*np.exp(-beta*z)/c/R**2
+
+def compute(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0):
+    a = get_a_implicit(k, c, alpha, I, l)
+    b = get_b_implicit(k, c, alpha, I, l)
+    c = get_c_implicit(k, c, alpha, I, l, T, K)
+    f = get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1)
+
+
 Form, Window = uic.loadUiType('D:\PythonProjects\\nmmp\interface.ui')
 app = QApplication([])
 window = Window()
