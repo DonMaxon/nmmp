@@ -113,12 +113,28 @@ def get_a_implicit(k, c, alpha, I, l):
     a[I-1]=-k/(alpha*h_z**2)
     return a
 
+def get_a_krank(k, c, alpha, I, l):
+    a = np.arange(0, I, dtype=float)
+    h_z=l/I
+    for i in range(0, I-1):
+        a[i]=-k/(2*c*h_z)
+    a[I-1]=-k/(alpha*h_z)
+    return a
+
 def get_b_implicit(k, c, alpha, I, l):
     b = np.arange(0, I, dtype=float)
     h_z=l/I
     for i in range(1, I):
         b[i]=-k/(c*h_z**2)
     b[0]=-k/(alpha*h_z**2)
+    return b
+
+def get_b_krank(k, c, alpha, I, l):
+    b = np.arange(0, I, dtype=float)
+    h_z=l/I
+    for i in range(1, I):
+        b[i]=-k/(2*c*h_z)
+    b[0]=-k/(alpha*h_z)
     return b
 
 def get_c_implicit(k, c, alpha, I, l, T, K):
@@ -131,11 +147,21 @@ def get_c_implicit(k, c, alpha, I, l, T, K):
     c[I]=1+k/(alpha*h_z)
     return c
 
-def get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1):
+def get_c_krank(k, c, alpha, I, l, T, K):
+    c = np.arange(0, I+1, dtype=float)
+    h_z=l/I
+    h_t=T/K
+    c[0]=1+k/alpha/h_z+c*h_z/2/alpha/h_t
+    for i in range(1, I):
+        c[i]=1/h_t+1/(c*h_z**2)
+    c[I]=1+k/(alpha*h_z)+c*h_z/2/alpha/h_t
+    return c
+
+def get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1, alpha):
     f = np.arange(0, I+1, dtype=float)
     h_t=T/K
-    f[0]=u_0
     phi = get_phi(c, R, beta, p, a, I, l)
+    #f[0]=u_0+phi[0]*c*h_z/2/alpha+u_0**n*c*h_z/2/alpha/h_t
     for i in range(1, I):
         f[i]=phi[i]+u_k_minus_1/h_t
     c[I]=1+k/(alpha*h_z)
