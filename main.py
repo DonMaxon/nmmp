@@ -7,104 +7,6 @@ from pyqtgraph import PlotWidget
 import os
 import solving as s
 
-def button_clicked():
-    с = 1.35
-    l = 5
-    k_thermal_cond=0.065
-    alpha = 0.008
-    T=150
-    beta = 0.1
-    R = 3
-    u_0 = 0
-    p = 60
-    a = 0.1*R
-    i = k = 1
-    I = K = 1000
-
-    if (form.lineEdit.text()!=''):
-        l = (float)(form.lineEdit.text())
-    if (form.lineEdit_2.text() != ''):
-        R = (float)(form.lineEdit_2.text())
-    if (form.lineEdit_3.text() != ''):
-        beta = (float)(form.lineEdit_3.text())
-    if (form.lineEdit_4.text() != ''):
-        k_thermal_cond = (float)(form.lineEdit_4.text())
-    if (form.lineEdit_5.text() != ''):
-        c = (float)(form.lineEdit_5.text())
-    if (form.lineEdit_6.text() != ''):
-        alpha = (float)(form.lineEdit_6.text())
-    if (form.lineEdit_7.text() != ''):
-        T = (float)(form.lineEdit_7.text())
-    if (form.lineEdit_8.text() != ''):
-        u_0 = (float)(form.lineEdit_8.text())
-    if (form.lineEdit_11.text() != ''):
-        i = (float)(form.lineEdit_11.text())
-    if (form.lineEdit_12.text() != ''):
-        k = (float)(form.lineEdit_12.text())
-    if (form.lineEdit_9.text() != ''):
-        I = (float)(form.lineEdit_9.text())
-    if (form.lineEdit_10.text() != ''):
-        K = (float)(form.lineEdit_10.text())
-    if (form.lineEdit_13.text() != ''):
-        p = (float)(form.lineEdit_13.text())
-    if (form.lineEdit_14.text() != ''):
-        a = (float)(form.lineEdit_14.text())*R
-    x = np.arange(1000)
-    y = np.random.normal(size=(3, 1000))
-    plotWidget = pg.plot(title="График для фиксированного i="+(str)(i))
-    plotWidget2 = pg.plot(title="График для фиксированного k="+(str)(k))
-    plotWidget.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
-    plotWidget2.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
-
-def button_clicked_2():
-    с = 1.35
-    l = 5
-    k_thermal_cond = 0.065
-    alpha = 0.008
-    T = 150
-    beta = 0.1
-    R = 3
-    u_0 = 0
-    p = 60
-    a = 0.1 * R
-    i = k = 1
-    I = K = 1000
-
-    if (form.lineEdit.text() != ''):
-        l = (float)(form.lineEdit.text())
-    if (form.lineEdit_2.text() != ''):
-        R = (float)(form.lineEdit_2.text())
-    if (form.lineEdit_3.text() != ''):
-        beta = (float)(form.lineEdit_3.text())
-    if (form.lineEdit_4.text() != ''):
-        k_thermal_cond = (float)(form.lineEdit_4.text())
-    if (form.lineEdit_5.text() != ''):
-        c = (float)(form.lineEdit_5.text())
-    if (form.lineEdit_6.text() != ''):
-        alpha = (float)(form.lineEdit_6.text())
-    if (form.lineEdit_7.text() != ''):
-        T = (float)(form.lineEdit_7.text())
-    if (form.lineEdit_8.text() != ''):
-        u_0 = (float)(form.lineEdit_8.text())
-    if (form.lineEdit_11.text() != ''):
-        i = (float)(form.lineEdit_11.text())
-    if (form.lineEdit_12.text() != ''):
-        k = (float)(form.lineEdit_12.text())
-    if (form.lineEdit_9.text() != ''):
-        I = (float)(form.lineEdit_9.text())
-    if (form.lineEdit_10.text() != ''):
-        K = (float)(form.lineEdit_10.text())
-    if (form.lineEdit_13.text() != ''):
-        p = (float)(form.lineEdit_13.text())
-    if (form.lineEdit_14.text() != ''):
-        a = (float)(form.lineEdit_14.text()) * R
-    x = np.arange(1000)
-    y = np.random.normal(size=(3, 1000))
-    plotWidget = pg.plot(title="График для фиксированного i=" + (str)(i))
-    plotWidget2 = pg.plot(title="График для фиксированного k=" + (str)(k))
-    plotWidget.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
-    plotWidget2.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
-
 def get_a_implicit(k, c, alpha, I, l):
     a = np.arange(0, I, dtype=float)
     h_z=l/I
@@ -161,11 +63,11 @@ def get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1, alpha):
     f = np.arange(0, I+1, dtype=float)
     h_t=T/K
     phi = get_phi(c, R, beta, p, a, I, l)
-    #f[0]=u_0+phi[0]*c*h_z/2/alpha+u_0**n*c*h_z/2/alpha/h_t
+    f[0]=u_0
     for i in range(1, I):
-        f[i]=phi[i]+u_k_minus_1/h_t
-    c[I]=1+k/(alpha*h_z)
-    return c
+        f[i]=phi[i]+u_k_minus_1[i]/h_t
+    f[I]=u_0
+    return f
 
 def get_phi(c, R, beta, p, a, I, l):
     integral = 0
@@ -175,11 +77,121 @@ def get_phi(c, R, beta, p, a, I, l):
         integral+=p*np.exp(-(r/a)**2)/2/a**2*r
     return 2*np.exp(-beta*z)/c/R**2
 
-def compute(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0):
+def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0):
     a = get_a_implicit(k, c, alpha, I, l)
     b = get_b_implicit(k, c, alpha, I, l)
     c = get_c_implicit(k, c, alpha, I, l, T, K)
-    f = get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1)
+    f = get_f_implicit(u_0, c, R, beta, p, a, np.full(I-1, u_0))
+    u = np.zeros((K, I))
+    u[0][:] = solving(a, b, c, f)
+    for i in range(1, K):
+        f = get_f_implicit(u_0, c, R, beta, p, a, u[i - 1])
+        u[i][:]=solving(a, b, c, f)
+    return u[i][:], u[:][k]
+
+
+
+def button_clicked():
+    с = 1.35
+    l = 5
+    k_thermal_cond=0.065
+    alpha = 0.008
+    T=150
+    beta = 0.1
+    R = 3
+    u_0 = 0
+    p = 60
+    a = 0.1*R
+    i = k = 1
+    I = K = 1000
+
+    if (form.lineEdit.text()!=''):
+        l = (float)(form.lineEdit.text())
+    if (form.lineEdit_2.text() != ''):
+        R = (float)(form.lineEdit_2.text())
+    if (form.lineEdit_3.text() != ''):
+        beta = (float)(form.lineEdit_3.text())
+    if (form.lineEdit_4.text() != ''):
+        k_thermal_cond = (float)(form.lineEdit_4.text())
+    if (form.lineEdit_5.text() != ''):
+        c = (float)(form.lineEdit_5.text())
+    if (form.lineEdit_6.text() != ''):
+        alpha = (float)(form.lineEdit_6.text())
+    if (form.lineEdit_7.text() != ''):
+        T = (float)(form.lineEdit_7.text())
+    if (form.lineEdit_8.text() != ''):
+        u_0 = (float)(form.lineEdit_8.text())
+    if (form.lineEdit_11.text() != ''):
+        i = (float)(form.lineEdit_11.text())
+    if (form.lineEdit_12.text() != ''):
+        k = (float)(form.lineEdit_12.text())
+    if (form.lineEdit_9.text() != ''):
+        I = (float)(form.lineEdit_9.text())
+    if (form.lineEdit_10.text() != ''):
+        K = (float)(form.lineEdit_10.text())
+    if (form.lineEdit_13.text() != ''):
+        p = (float)(form.lineEdit_13.text())
+    if (form.lineEdit_14.text() != ''):
+        a = (float)(form.lineEdit_14.text())*R
+    u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0)
+    zs = np.arange(0, l, l/I)
+    ts = np.arange(0, T, T / K)
+    plotWidget = pg.plot(title="График для фиксированного i="+(str)(i))
+    plotWidget2 = pg.plot(title="График для фиксированного k="+(str)(k))
+    plotWidget.plot(zs, u_k)  ## setting pen=(i,3) automaticaly creates three different-colored pens
+    plotWidget2.plot(ts, u_i)  ## setting pen=(i,3) automaticaly creates three different-colored pens
+
+def button_clicked_2():
+    с = 1.35
+    l = 5
+    k_thermal_cond = 0.065
+    alpha = 0.008
+    T = 150
+    beta = 0.1
+    R = 3
+    u_0 = 0
+    p = 60
+    a = 0.1 * R
+    i = k = 1
+    I = K = 1000
+
+    if (form.lineEdit.text() != ''):
+        l = (float)(form.lineEdit.text())
+    if (form.lineEdit_2.text() != ''):
+        R = (float)(form.lineEdit_2.text())
+    if (form.lineEdit_3.text() != ''):
+        beta = (float)(form.lineEdit_3.text())
+    if (form.lineEdit_4.text() != ''):
+        k_thermal_cond = (float)(form.lineEdit_4.text())
+    if (form.lineEdit_5.text() != ''):
+        c = (float)(form.lineEdit_5.text())
+    if (form.lineEdit_6.text() != ''):
+        alpha = (float)(form.lineEdit_6.text())
+    if (form.lineEdit_7.text() != ''):
+        T = (float)(form.lineEdit_7.text())
+    if (form.lineEdit_8.text() != ''):
+        u_0 = (float)(form.lineEdit_8.text())
+    if (form.lineEdit_11.text() != ''):
+        i = (float)(form.lineEdit_11.text())
+    if (form.lineEdit_12.text() != ''):
+        k = (float)(form.lineEdit_12.text())
+    if (form.lineEdit_9.text() != ''):
+        I = (float)(form.lineEdit_9.text())
+    if (form.lineEdit_10.text() != ''):
+        K = (float)(form.lineEdit_10.text())
+    if (form.lineEdit_13.text() != ''):
+        p = (float)(form.lineEdit_13.text())
+    if (form.lineEdit_14.text() != ''):
+        a = (float)(form.lineEdit_14.text()) * R
+    x = np.arange(1000)
+    y = np.random.normal(size=(3, 1000))
+    plotWidget = pg.plot(title="График для фиксированного i=" + (str)(i))
+    plotWidget2 = pg.plot(title="График для фиксированного k=" + (str)(k))
+    plotWidget.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
+    plotWidget2.plot(x, y[i])  ## setting pen=(i,3) automaticaly creates three different-colored pens
+
+
+
 
 
 Form, Window = uic.loadUiType('D:\PythonProjects\\nmmp\interface.ui')
