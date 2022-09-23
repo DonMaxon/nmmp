@@ -73,7 +73,7 @@ def get_f_krank(u_0, c, R, beta, p, a, u_k_minus_1, alpha, I, T, K, l, k):
     f = np.arange(0, I+1, dtype=float)
     h_t=T/K
     h_z=l/I
-    phi = get_phi_krank(c, R, beta, p, a, I, l)
+    phi = get_phi(c, R, beta, p, a, I, l)
     f[0]=c*h_z/(2*alpha*h_t)*u_k_minus_1[0]+c*h_z/2/alpha*phi[0]+u_0
     for i in range(1, I):
         f[i]=phi[i]+k/(2*c*h_z**2)*u_k_minus_1[i]+k/(2*c*h_z**2)*u_k_minus_1[i-2]+(1/h_t-k/(c*h_z**2))*u_k_minus_1[i-1]
@@ -82,7 +82,7 @@ def get_f_krank(u_0, c, R, beta, p, a, u_k_minus_1, alpha, I, T, K, l, k):
 
 def get_phi(c, R, beta, p, a, I, l):
     integral = 0
-    z = np.arange(0, l, l/I)
+    z = np.arange(0, l, l/(I+1))
     for i in range(1, 1001):
         r = i/1000*R
         r_1 = (i-1)/1000*R
@@ -106,11 +106,11 @@ def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p
     cm = get_c_implicit(k, c, alpha, I, l, T, K)
     fm = get_f_implicit(u_0, c, R, beta, p, a, np.full(I, u_0), alpha, I, T, K, l)
     u = np.zeros((K, I+1))
-    u[0][:] = s.thomas_method(am, bm, cm, fm)
+    u[0, :] = s.thomas_method(am, bm, cm, fm)
     for i in range(1, K):
-        fm = get_f_implicit(u_0, c, R, beta, p, a, u[i - 1], alpha, I, T, K, l)
-        u[i][:]=s.thomas_method(am, bm, cm, fm)
-    return u[i][:], u[:][k]
+        fm = get_f_implicit(u_0, c, R, beta, p, a, u[i - 1, :], alpha, I, T, K, l)
+        u[i, :]=s.thomas_method(am, bm, cm, fm)
+    return u[i, :], u[:, k]
 
 def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
     am = get_a_krank(k, c, alpha, I, l)
@@ -118,11 +118,11 @@ def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a
     cm = get_c_krank(k, c, alpha, I, l, T, K)
     fm = get_f_krank(u_0, c, R, beta, p, a, np.full(I+1, u_0), alpha, I, T, K, l, k)
     u = np.zeros((K, I+1))
-    u[0][:] = s.thomas_method(am, bm, cm, fm)
+    u[0, :] = s.thomas_method(am, bm, cm, fm)
     for i in range(1, K):
-        fm = get_f_krank(u_0, c, R, beta, p, a, u[i - 1], alpha, I, T, K, l, k)
-        u[i][:]=s.thomas_method(am, bm, cm, fm)
-    return u[i][:], u[:][k]
+        fm = get_f_krank(u_0, c, R, beta, p, a, u[i - 1, :], alpha, I, T, K, l, k)
+        u[i, :]=s.thomas_method(am, bm, cm, fm)
+    return u[i, :], u[:, k]
 
 
 def button_clicked():
@@ -160,20 +160,20 @@ def button_clicked():
     if (form.lineEdit_12.text() != ''):
         k = (float)(form.lineEdit_12.text())
     if (form.lineEdit_9.text() != ''):
-        I = (float)(form.lineEdit_9.text())
+        I = (int)(form.lineEdit_9.text())
     if (form.lineEdit_10.text() != ''):
-        K = (float)(form.lineEdit_10.text())
+        K = (int)(form.lineEdit_10.text())
     if (form.lineEdit_13.text() != ''):
         p = (float)(form.lineEdit_13.text())
     if (form.lineEdit_14.text() != ''):
         a = (float)(form.lineEdit_14.text())*R
     u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0,R, beta, p ,a)
     zs = np.arange(0, l, l/(I+1))
-    ts = np.arange(0, T, T / (K+1))
+    ts = np.arange(0, T, T / (K))
     plotWidget = pg.plot(title="График для фиксированного i="+(str)(i))
     plotWidget2 = pg.plot(title="График для фиксированного k="+(str)(k))
-    plotWidget.plot(zs, u_k)
-    plotWidget2.plot(ts, u_i)
+    plotWidget.plot(zs, u_i)
+    plotWidget2.plot(ts, u_k)
 
 def button_clicked_2():
     c = 1.35
@@ -210,20 +210,20 @@ def button_clicked_2():
     if (form.lineEdit_12.text() != ''):
         k = (float)(form.lineEdit_12.text())
     if (form.lineEdit_9.text() != ''):
-        I = (float)(form.lineEdit_9.text())
+        I = (int)(form.lineEdit_9.text())
     if (form.lineEdit_10.text() != ''):
-        K = (float)(form.lineEdit_10.text())
+        K = (int)(form.lineEdit_10.text())
     if (form.lineEdit_13.text() != ''):
         p = (float)(form.lineEdit_13.text())
     if (form.lineEdit_14.text() != ''):
         a = (float)(form.lineEdit_14.text()) * R
     u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
-    zs = np.arange(0, l, l / (I + 1))
-    ts = np.arange(0, T, T / (K + 1))
+    zs = np.arange(0, l, l / (I+1))
+    ts = np.arange(0, T, T / (K))
     plotWidget = pg.plot(title="График для фиксированного i=" + (str)(i))
     plotWidget2 = pg.plot(title="График для фиксированного k=" + (str)(k))
-    plotWidget.plot(zs, u_k)
-    plotWidget2.plot(ts, u_i)
+    plotWidget.plot(zs, u_i)
+    plotWidget2.plot(ts, u_k)
 
 
 
