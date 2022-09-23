@@ -76,7 +76,7 @@ def get_f_krank(u_0, c, R, beta, p, a, u_k_minus_1, alpha, I, T, K, l, k):
     phi = get_phi(c, R, beta, p, a, I, l)
     f[0]=c*h_z/(2*alpha*h_t)*u_k_minus_1[0]+c*h_z/2/alpha*phi[0]+u_0
     for i in range(1, I):
-        f[i]=phi[i]+k/(2*c*h_z**2)*u_k_minus_1[i]+k/(2*c*h_z**2)*u_k_minus_1[i-2]+(1/h_t-k/(c*h_z**2))*u_k_minus_1[i-1]
+        f[i]=phi[i]+k/(2*c*h_z**2)*u_k_minus_1[i+1]+k/(2*c*h_z**2)*u_k_minus_1[i-1]+(1/h_t-k/(c*h_z**2))*u_k_minus_1[i]
     f[I]=c*h_z/(2*alpha*h_t)*u_k_minus_1[I]+c*h_z/2/alpha*phi[I]+u_0
     return f
 
