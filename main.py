@@ -10,32 +10,28 @@ import solving as s
 def get_a_implicit(k, c, alpha, I, l):
     a = np.arange(0, I, dtype=float)
     h_z=l/I
-    for i in range(0, I-1):
-        a[i]=-k/(c*h_z**2)
+    a[0:I-1]=-k/(c*h_z**2)
     a[I-1]=-k/(alpha*h_z**2)
     return a
 
 def get_a_krank(k, c, alpha, I, l):
     a = np.arange(0, I, dtype=float)
     h_z=l/I
-    for i in range(0, I-1):
-        a[i]=-k/(2*c*h_z)
+    a[0:I-1]=-k/(2*c*h_z)
     a[I-1]=-k/(alpha*h_z)
     return a
 
 def get_b_implicit(k, c, alpha, I, l):
     b = np.arange(0, I, dtype=float)
     h_z=l/I
-    for i in range(1, I):
-        b[i]=-k/(c*h_z**2)
+    b[1:I]=-k/(c*h_z**2)
     b[0]=-k/(alpha*h_z**2)
     return b
 
 def get_b_krank(k, c, alpha, I, l):
     b = np.arange(0, I, dtype=float)
     h_z=l/I
-    for i in range(1, I):
-        b[i]=-k/(2*c*h_z)
+    b[1:I]=-k/(2*c*h_z)
     b[0]=-k/(alpha*h_z)
     return b
 
@@ -44,8 +40,7 @@ def get_c_implicit(k, c, alpha, I, l, T, K):
     h_z=l/I
     h_t=T/K
     cm[0]=1-k/(alpha*h_z)
-    for i in range(1, I):
-        cm[i]=1/h_t+2*k/(c*h_z**2)
+    cm[1:I]=1/h_t+2*k/(c*h_z**2)
     cm[I]=1+k/(alpha*h_z)
     return cm
 
@@ -54,8 +49,7 @@ def get_c_krank(k, c, alpha, I, l, T, K):
     h_z=l/I
     h_t=T/K
     cm[0]=1+k/alpha/h_z+c*h_z/2/alpha/h_t
-    for i in range(1, I):
-        cm[i]=1/h_t+1/(c*h_z**2)
+    cm[1:I]=1/h_t+1/(c*h_z**2)
     cm[I]=1+k/(alpha*h_z)+c*h_z/2/alpha/h_t
     return cm
 
