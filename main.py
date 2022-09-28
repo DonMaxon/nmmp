@@ -209,9 +209,9 @@ def button_clicked_2():
     if (form.lineEdit_8.text() != ''):
         u_0 = (float)(form.lineEdit_8.text())
     if (form.lineEdit_11.text() != ''):
-        i = (float)(form.lineEdit_11.text())
+        i = (int)(form.lineEdit_11.text())
     if (form.lineEdit_12.text() != ''):
-        k = (float)(form.lineEdit_12.text())
+        k = (int)(form.lineEdit_12.text())
     if (form.lineEdit_9.text() != ''):
         I = (int)(form.lineEdit_9.text())
     if (form.lineEdit_10.text() != ''):
