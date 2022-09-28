@@ -98,12 +98,12 @@ def get_phi_krank(c, R, beta, p, a, I, l):
         r_1 = (i-1)/1000*R
         integral+=p*np.exp(-(r/a)**2)/2/a**2*r+p*np.exp(-(r_1/a)**2)/2/a**2*r_1
     integral*=1/2000
-    return 2*np.exp(-beta*z)/c/R**2
+    return beta*2*np.exp(-beta*z)/c/R**2
 
 def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
-    am = get_a_implicit(k, c, alpha, I, l)
-    bm = get_b_implicit(k, c, alpha, I, l)
-    cm = get_c_implicit(k, c, alpha, I, l, T, K)
+    am = get_a_implicit(k_thermal_cond, c, alpha, I, l)
+    bm = get_b_implicit(k_thermal_cond, c, alpha, I, l)
+    cm = get_c_implicit(k_thermal_cond, c, alpha, I, l, T, K)
     fm = get_f_implicit(u_0, c, R, beta, p, a, np.full(I, u_0), alpha, I, T, K, l)
     u = np.zeros((K, I+1))
 
@@ -115,9 +115,9 @@ def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p
     return u[i, :], u[:, k]
 
 def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
-    am = get_a_krank(k, c, alpha, I, l)
-    bm = get_b_krank(k, c, alpha, I, l)
-    cm = get_c_krank(k, c, alpha, I, l, T, K)
+    am = get_a_krank(k_thermal_cond, c, alpha, I, l)
+    bm = get_b_krank(k_thermal_cond, c, alpha, I, l)
+    cm = get_c_krank(k_thermal_cond, c, alpha, I, l, T, K)
     fm = get_f_krank(u_0, c, R, beta, p, a, np.full(I+1, u_0), alpha, I, T, K, l, k)
     u = np.zeros((K, I+1))
     #u[0, :] = s.thomas_method(am, bm, cm, fm)
