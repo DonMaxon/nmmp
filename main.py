@@ -150,8 +150,8 @@ def button_clicked():
     ts = np.arange(0, T, T / (K+1))
     plotWidget = pg.plot(title="График для фиксированного i="+(str)(i))
     plotWidget2 = pg.plot(title="График для фиксированного k="+(str)(k))
-    plotWidget.plot(zs, u_i)
-    plotWidget2.plot(ts, u_k)
+    plotWidget.plot(ts, u_i)
+    plotWidget2.plot(zs, u_k)
 
 
 def button_clicked_2():
