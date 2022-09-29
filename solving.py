@@ -19,8 +19,8 @@ def thomas_method(a, c, a1, c1, f):
 		q = np.append(q, (f[i]-a*q[i-1])/(c+a*p[i-1]))
 	print(p)
 	print(q)
-	q = np.append(q, (f[-1]-a*q[-1])/(c+a*p[-1]))
-	u[-1] = q[-1]
-	for i in range(length-2, -1, -1):
-		u[i] = q[i]+p[i]*u[i+1]
+	q = np.append(q, (f[length-1]-a*q[length-2])/(c+a*p[length-2]))
+	u[length-1] = q[length-1]
+	for i in range(2, length+1, 1):
+		u[length-i] = q[length-i]+p[length-i]*u[length-i+1]
 	return u
