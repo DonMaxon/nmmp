@@ -10,14 +10,16 @@ def thomas_method(a, c, a1, c1, f):
 	"""
 	length = len(f)
 	u = np.zeros(length)
-	p = np.zeros(length-1)
-	q = np.zeros(length)
-	p[0] = -a1/c1
-	q[0] = f[0]/c1
-	for i in range(1, length-1):
-		p[i] = -a/(c+a*p[i-1])
-		q[i] = (f[i]-a*q[i-1])/(c+a*p[i-1])
-	q[length-1] = (f[length-1]-a1*q[length-2])/(c1+a1*p[length-2])
+	p = np.array([-a1/c1])
+	q = np.array([f[0]/c1])
+	print(p)
+	print(q)
+	for i in range(1, length):
+		p = np.append(p, -a/(c+a*p[i-1]))
+		q = np.append(q, (f[i]-a*q[i-1])/(c+a*p[i-1]))
+	print(p)
+	print(q)
+	q = np.append(q, (f[length-1]-a*q[length-2])/(c+a*p[length-2]))
 	u[length-1] = q[length-1]
 	for i in range(2, length+1, 1):
 		u[length-i] = q[length-i]+p[length-i]*u[length-i+1]

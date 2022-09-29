@@ -9,12 +9,10 @@ import solving as s
 
 
 def get_a_implicit(k, c, alpha, I, l):
-    a = np.arange(0, I, dtype=float)
-    h_z=l/I
-    for i in range(0, I-1):
-        a[i]=-k/(c*h_z**2)
-    a[I-1]=-k/(alpha*h_z**2)
-    return a
+    h_z = l / I
+    a = -k/(c*h_z**2)
+    a1 = -k/(alpha*h_z)
+    return a, a1
 
 
 def get_a_krank(k, c, I, l, K, T):
@@ -25,25 +23,12 @@ def get_a_krank(k, c, I, l, K, T):
     a1 = 2*a
     return a, a1
 
-
-def get_b_implicit(k, c, alpha, I, l):
-    b = np.arange(0, I, dtype=float)
-    h_z=l/I
-    for i in range(1, I):
-        b[i]=-k/(c*h_z**2)
-    b[0]=-k/(alpha*h_z**2)
-    return b
-
-
 def get_c_implicit(k, c, alpha, I, l, T, K):
-    cm = np.arange(0, I+1, dtype=float)
     h_z=l/I
     h_t=T/K
-    cm[0]=1-k/(alpha*h_z)
-    for i in range(1, I):
-        cm[i]=1/h_t+2*k/(c*h_z**2)
-    cm[I]=1+k/(alpha*h_z)
-    return cm
+    cm = 1/h_t+2*k/(c*h_z**2)
+    cm1=1+k/(alpha*h_z)
+    return cm, cm1
 
 
 def get_c_krank(k, c, alpha, I, l, T, K):
@@ -58,7 +43,7 @@ def get_c_krank(k, c, alpha, I, l, T, K):
 def get_f_implicit(u_0, c, R, beta, p, a, u_k_minus_1, alpha, I, T, K, l):
     f = np.arange(0, I+1, dtype=float)
     h_t=T/K
-    phi = get_phi(c, R, beta, p, a, I, l)
+    phi = get_phi_krank(c, R, beta, p, a, I, l)
     f[0]=u_0
     for i in range(1, I):
         f[i]=phi[i]+u_k_minus_1[i]/h_t
@@ -95,18 +80,16 @@ def get_phi_krank(c, R, beta, p, a, I, l):
 
 
 def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
-    am = get_a_implicit(k_thermal_cond, c, alpha, I, l)
-    bm = get_b_implicit(k_thermal_cond, c, alpha, I, l)
-    cm = get_c_implicit(k_thermal_cond, c, alpha, I, l, T, K)
-    fm = get_f_implicit(u_0, c, R, beta, p, a, np.full(I, u_0), alpha, I, T, K, l)
-    u = np.zeros((K, I+1))
+    am, am1 = get_a_implicit(k_thermal_cond, c, alpha, I, l)
+    cm, cm1 = get_c_implicit(k_thermal_cond, c, alpha, I, l, T, K)
+    u = np.zeros((K+1, I+1))
 
     #u[0, :] = s.thomas_method(am, bm, cm, fm)
     u[0, :] = u_0
-    for j in range(1, K):
+    for j in range(1, K+1):
         fm = get_f_implicit(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l)
-        u[j, :]=s.thomas_method(am, bm, cm, fm)
-    return u[i, :], u[:, k]
+        u[j, :]=s.thomas_method(am, cm, am1, cm1, fm)
+    return u[:, i], u[k, :]
 
 
 def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
@@ -164,7 +147,7 @@ def button_clicked():
         a = (float)(form.lineEdit_14.text())*R
     u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0,R, beta, p ,a)
     zs = np.arange(0, l, l/(I+1))
-    ts = np.arange(0, T, T / (K))
+    ts = np.arange(0, T, T / (K+1))
     plotWidget = pg.plot(title="График для фиксированного i="+(str)(i))
     plotWidget2 = pg.plot(title="График для фиксированного k="+(str)(k))
     plotWidget.plot(zs, u_i)
@@ -222,7 +205,7 @@ def button_clicked_2():
     plot_widget2.plot(zs, u_k)
 
 
-Form, Window = uic.loadUiType('interface.ui')
+Form, Window = uic.loadUiType('D:\PythonProjects\\nmmp\interface.ui')
 app = QApplication([])
 window = Window()
 form = Form()
@@ -231,4 +214,3 @@ form.pushButton.clicked.connect(button_clicked)
 form.pushButton_2.clicked.connect(button_clicked_2)
 window.show()
 app.exec_()
-
