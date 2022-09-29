@@ -110,12 +110,12 @@ def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p
 
 
 def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
-    am, am1 = get_a_krank(k, c, I, l, K, T)
+    am, am1 = get_a_krank(k_thermal_cond, c, I, l, K, T)
     cm, cm1 = get_c_krank(k_thermal_cond, c, alpha, I, l, T, K)
     u = np.zeros((K+1, I+1))
     u[0, :] = u_0
     for j in range(1, K+1):
-        fm = get_f_krank(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l, k)
+        fm = get_f_krank(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l, k_thermal_cond)
         u[j, :] = s.thomas_method(am, cm, am1, cm1, fm)
     return u[:, i], u[k, :]
 
