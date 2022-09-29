@@ -109,9 +109,9 @@ def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p
 
     #u[0, :] = s.thomas_method(am, bm, cm, fm)
     u[0, :] = u_0
-    for i in range(1, K):
-        fm = get_f_implicit(u_0, c, R, beta, p, a, u[i - 1, :], alpha, I, T, K, l)
-        u[i, :]=s.thomas_method(am, bm, cm, fm)
+    for j in range(1, K):
+        fm = get_f_implicit(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l)
+        u[j, :]=s.thomas_method(am, bm, cm, fm)
     return u[i, :], u[:, k]
 
 def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
@@ -122,9 +122,9 @@ def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a
     u = np.zeros((K, I+1))
     #u[0, :] = s.thomas_method(am, bm, cm, fm)
     u[0, :] = u_0
-    for i in range(1, K):
-        fm = get_f_krank(u_0, c, R, beta, p, a, u[i - 1, :], alpha, I, T, K, l, k)
-        u[i, :]=s.thomas_method(am, bm, cm, fm)
+    for j in range(1, K):
+        fm = get_f_krank(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l, k)
+        u[j, :]=s.thomas_method(am, bm, cm, fm)
     return u[i, :], u[:, k]
 
 
@@ -159,9 +159,9 @@ def button_clicked():
     if (form.lineEdit_8.text() != ''):
         u_0 = (float)(form.lineEdit_8.text())
     if (form.lineEdit_11.text() != ''):
-        i = (float)(form.lineEdit_11.text())
+        i = (int)(form.lineEdit_11.text())
     if (form.lineEdit_12.text() != ''):
-        k = (float)(form.lineEdit_12.text())
+        k = (int)(form.lineEdit_12.text())
     if (form.lineEdit_9.text() != ''):
         I = (int)(form.lineEdit_9.text())
     if (form.lineEdit_10.text() != ''):
