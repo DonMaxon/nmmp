@@ -23,6 +23,7 @@ def get_a_krank(k, c, I, l, K, T):
     a1 = 2*a
     return a, a1
 
+
 def get_c_implicit(k, c, alpha, I, l, T, K):
     h_z=l/I
     h_t=T/K
@@ -205,7 +206,7 @@ def button_clicked_2():
     plot_widget2.plot(zs, u_k)
 
 
-Form, Window = uic.loadUiType('D:\PythonProjects\\nmmp\interface.ui')
+Form, Window = uic.loadUiType('interface.ui')
 app = QApplication([])
 window = Window()
 form = Form()
