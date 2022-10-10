@@ -3,6 +3,7 @@ import pyqtgraph as pg
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication
 from pyqtgraph import PlotWidget
+from matplotlib import pyplot as plt
 
 import os
 import solving as s
@@ -78,10 +79,10 @@ def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p
     for j in range(1, K+1):
         fm = get_f_implicit(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l)
         u[j, :]=s.thomas_method(am, cm, am1, cm1, fm)
-    return u[:, i], u[k, :]
+    return u
 
 
-def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
+def compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a):
     am, am1 = get_a_krank(k_thermal_cond, c, I, l, K, T)
     cm, cm1 = get_c_krank(k_thermal_cond, c, alpha, I, l, T, K)
     u = np.zeros((K+1, I+1))
@@ -89,7 +90,7 @@ def compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a
     for j in range(1, K+1):
         fm = get_f_krank(u_0, c, R, beta, p, a, u[j - 1, :], alpha, I, T, K, l, k_thermal_cond)
         u[j, :] = s.thomas_method(am, cm, am1, cm1, fm)
-    return u[:, i], u[k, :]
+    return u
 
 
 def button_clicked():
@@ -146,41 +147,38 @@ def button_clicked():
     plot_widget2.setBackground('w')
     plot_widget2.showGrid(x=True, y=True)
     if not mult_graph_i and not mult_graph_k:
-        u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
         zs = np.arange(0, l, l / (I + 1))
         ts = np.arange(0, T, T / (K + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, i], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[k, :], pen=pg.mkPen(color=(0, 0, 0)))
     if not mult_graph_i and mult_graph_k:
-        u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, K-1, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, i], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[K - 1, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, int(j*K/4)+1, l, T, K, u_0, R, beta, p, a)
-            plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
     if mult_graph_i and not mult_graph_k:
-        u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, I-1, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, I - 1, k, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, I - 1], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[k, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, int(j*I/4)+1, k, l, T, K, u_0, R, beta, p, a)
-            plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
     if mult_graph_i and mult_graph_k:
-        u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c,I-1, K - 1, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, I - 1, K - 1, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, I - 1], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[K - 1, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, i, int(j * K / 4) + 1, l, T, K, u_0, R, beta, p, a)
-            plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_implicit(I, k_thermal_cond, alpha, c, int(j*I/4)+1, k, l, T, K, u_0, R, beta, p, a)
-            plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
+
 
 def button_clicked_2():
     c = 1.35
@@ -236,50 +234,156 @@ def button_clicked_2():
     plot_widget2.setBackground('w')
     plot_widget2.showGrid(x=True, y=True)
     if not mult_graph_i and not mult_graph_k:
-        u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         zs = np.arange(0, l, l / (I + 1))
         ts = np.arange(0, T, T / (K + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, i], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[k, :], pen=pg.mkPen(color=(0, 0, 0)))
     if not mult_graph_i and mult_graph_k:
-        u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, i, K - 1, l, T, K, u_0, R, beta, p, a)
+        u = compute_krank(I, k_thermal_cond, alpha, c, i, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, i], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[K-1, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, i, int(j * K / 4) + 1, l, T, K, u_0, R, beta, p, a)
-            plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
     if mult_graph_i and not mult_graph_k:
-        u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, I - 1, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, I-1], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[k, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, int(j * I / 4) + 1, k, l, T, K, u_0, R, beta, p, a)
-            plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
     if mult_graph_i and mult_graph_k:
-        u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, I - 1, K - 1, l, T, K, u_0, R, beta, p, a)
+        u = compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts,  u[:, I-1], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget2.plot(zs, u[K-1, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, i, int(j * K / 4) + 1, l, T, K, u_0, R, beta, p, a)
-            plot_widget2.plot(zs, u_k, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
         for j in range(4):
-            u_i, u_k = compute_krank(I, k_thermal_cond, alpha, c, int(j * I / 4) + 1, k, l, T, K, u_0, R, beta, p, a)
-            plot_widget.plot(ts, u_i, pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
+
+
+def test_cranck_button():
+    c = 1.35
+    l = 5
+    k_thermal_cond = 0.065
+    alpha = 0.008
+    T = 150
+    beta = 0.1
+    R = 3
+    u_0 = 0
+    p = 60
+    a = 0.1 * R
+    if form.lineEdit.text() != '':
+        l = float(form.lineEdit.text())
+    if form.lineEdit_2.text() != '':
+        R = float(form.lineEdit_2.text())
+    if form.lineEdit_3.text() != '':
+        beta = float(form.lineEdit_3.text())
+    if form.lineEdit_4.text() != '':
+        k_thermal_cond = float(form.lineEdit_4.text())
+    if form.lineEdit_5.text() != '':
+        c = float(form.lineEdit_5.text())
+    if form.lineEdit_6.text() != '':
+        alpha = float(form.lineEdit_6.text())
+    if form.lineEdit_7.text() != '':
+        T = float(form.lineEdit_7.text())
+    if form.lineEdit_8.text() != '':
+        u_0 = float(form.lineEdit_8.text())
+    if form.lineEdit_13.text() != '':
+        p = float(form.lineEdit_13.text())
+    if form.lineEdit_14.text() != '':
+        a = float(form.lineEdit_14.text()) * R
+    I = 5
+    K = 10
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    for i in range(10):
+        u = compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
+        for_i_xs = np.linspace(0, T, K+1)
+        for_i_us = u[:, I // 2]
+        for_n_xs = np.linspace(0, l, I+1)
+        for_n_us = u[K // 2, :]
+        axes[0].plot(for_i_xs, for_i_us, label='K = ' + str(K))
+        axes[1].plot(for_n_xs, for_n_us, label='I = ' + str(I))
+        I *= 2
+        K *= 2
+    name_0 = "Распределение температуры в точке z={:4.2f} см".format(l/2)
+    name_1 = "Распределение температуры в момент времени t={:4.2f} с".format(T / 2)
+    axes[0].set(title=name_0, xlabel="Время, с", ylabel="Темпераура, град")
+    axes[1].set(title=name_1, xlabel="Расстояние, см", ylabel="Темпераура, град")
+    axes[0].grid()
+    axes[1].grid()
+    axes[0].legend()
+    axes[1].legend()
+    fig.show()
+
+
+def shod_cranck_button():
+    c = 1.35
+    l = 5
+    k_thermal_cond = 0.065
+    alpha = 0.008
+    T = 150
+    beta = 0.1
+    R = 3
+    u_0 = 0
+    p = 60
+    a = 0.1 * R
+    if form.lineEdit.text() != '':
+        l = float(form.lineEdit.text())
+    if form.lineEdit_2.text() != '':
+        R = float(form.lineEdit_2.text())
+    if form.lineEdit_3.text() != '':
+        beta = float(form.lineEdit_3.text())
+    if form.lineEdit_4.text() != '':
+        k_thermal_cond = float(form.lineEdit_4.text())
+    if form.lineEdit_5.text() != '':
+        c = float(form.lineEdit_5.text())
+    if form.lineEdit_6.text() != '':
+        alpha = float(form.lineEdit_6.text())
+    if form.lineEdit_7.text() != '':
+        T = float(form.lineEdit_7.text())
+    if form.lineEdit_8.text() != '':
+        u_0 = float(form.lineEdit_8.text())
+    if form.lineEdit_13.text() != '':
+        p = float(form.lineEdit_13.text())
+    if form.lineEdit_14.text() != '':
+        a = float(form.lineEdit_14.text()) * R
+    I = 100
+    K = 10
+    fig, axes = plt.subplots(nrows=1, ncols=1)
+    us = []
+    for i in range(13):
+        u = compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
+        for_i_xs = np.linspace(0, l, I + 1)
+        for_i_us = u[K//2, :]
+        axes.plot(for_i_xs, for_i_us, label='K = ' + str(K))
+        us.append(u[K // 2, I // 2])
+        print("\nh_t = " + str(T/K))
+        print("u_ht = " + str(us[-1]) + "\n")
+        K *= 2
+    name_0 = "Распределение температуры в точке z={:4.2f} см".format(l / 2)
+    axes.set(title=name_0, xlabel="Время, с", ylabel="Темпераура, град")
+    axes.grid()
+    axes.legend()
+    fig.show()
 
 
 
-Form, Window = uic.loadUiType('D:\PythonProjects\\nmmp\interface.ui')
+
+
+Form, Window = uic.loadUiType('interface.ui')
 app = QApplication([])
 window = Window()
 form = Form()
 form.setupUi(window)
 form.pushButton.clicked.connect(button_clicked)
 form.pushButton_2.clicked.connect(button_clicked_2)
+form.pushButton_4.clicked.connect(test_cranck_button)
+form.pushButton_6.clicked.connect(shod_cranck_button)
 window.show()
 app.exec_()
