@@ -307,8 +307,8 @@ def test_cranck_button():
         for_i_us = u[:, I // 2]
         for_n_xs = np.linspace(0, l, I+1)
         for_n_us = u[K // 2, :]
-        axes[0].plot(for_i_xs, for_i_us, label='K = ' + str(K))
-        axes[1].plot(for_n_xs, for_n_us, label='I = ' + str(I))
+        axes[0].plot(for_i_xs, for_i_us, label='I = ' + str(I) + ', K = ' + str(K))
+        axes[1].plot(for_n_xs, for_n_us, label='I = ' + str(I) + ', K = ' + str(K))
         I *= 2
         K *= 2
     name_0 = "Распределение температуры в точке z={:4.2f} см".format(l/2)
