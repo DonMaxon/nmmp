@@ -1,9 +1,15 @@
+import sys
+sys.path.append('C:\\Users\Max\AppData\Local\Programs\Python\Python310\Lib\site-packages')
+
 import numpy as np
 import pyqtgraph as pg
+import matplotlib
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication
 from pyqtgraph import PlotWidget
 from matplotlib import pyplot as plt
+
+colors = ['r', 'b', 'c', 'm', 'g']
 
 import os
 import solving as s
@@ -71,7 +77,7 @@ def get_phi(c, R, beta, p, a, I, l):
     return beta*2*np.exp(-beta*z)/c/R**2*p/4*(1-np.exp(-R**2/a**2))
 
 
-def compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a):
+def compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a):
     am, am1 = get_a_implicit(k_thermal_cond, c, alpha, I, l)
     cm, cm1 = get_c_implicit(k_thermal_cond, c, alpha, I, l, T, K)
     u = np.zeros((K+1, I+1))
@@ -141,19 +147,21 @@ def button_clicked():
     if form.lineEdit_14.text() != '':
         a = float(form.lineEdit_14.text()) * R
     plot_widget = pg.plot(title="График для i")
+    plot_widget.addLegend()
     plot_widget.showGrid(x=True, y=True)
     plot_widget.setBackground('w')
     plot_widget2 = pg.plot(title="График для k")
+    plot_widget2.addLegend()
     plot_widget2.setBackground('w')
     plot_widget2.showGrid(x=True, y=True)
     if not mult_graph_i and not mult_graph_k:
-        u = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         zs = np.arange(0, l, l / (I + 1))
         ts = np.arange(0, T, T / (K + 1))
         plot_widget.plot(ts, u[:, i], pen=pg.mkPen(color=(0, 0, 0)))
         plot_widget2.plot(zs, u[k, :], pen=pg.mkPen(color=(0, 0, 0)))
     if not mult_graph_i and mult_graph_k:
-        u = compute_implicit(I, k_thermal_cond, alpha, c, i, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
         plot_widget.plot(ts, u[:, i], pen=pg.mkPen(color=(0, 0, 0)))
@@ -161,7 +169,7 @@ def button_clicked():
         for j in range(4):
             plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
     if mult_graph_i and not mult_graph_k:
-        u = compute_implicit(I, k_thermal_cond, alpha, c, I - 1, k, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
         plot_widget.plot(ts, u[:, I - 1], pen=pg.mkPen(color=(0, 0, 0)))
@@ -169,15 +177,15 @@ def button_clicked():
         for j in range(4):
             plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
     if mult_graph_i and mult_graph_k:
-        u = compute_implicit(I, k_thermal_cond, alpha, c, I - 1, K - 1, l, T, K, u_0, R, beta, p, a)
+        u = compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts, u[:, I - 1], pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u[K - 1, :], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, I - 1], pen=pg.mkPen(color=colors[0], width = 3))
+        plot_widget2.plot(zs, u[K - 1, :], pen=pg.mkPen(color=colors[0], width = 3))
         for j in range(4):
-            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=colors[j+1], width = 3))
         for j in range(4):
-            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=colors[j+1], width = 3))
 
 
 def button_clicked_2():
@@ -227,10 +235,13 @@ def button_clicked_2():
         p = float(form.lineEdit_13.text())
     if form.lineEdit_14.text() != '':
         a = float(form.lineEdit_14.text()) * R
+
     plot_widget = pg.plot(title="График для i")
+    plot_widget.addLegend()
     plot_widget.showGrid(x=True, y=True)
     plot_widget.setBackground('w')
     plot_widget2 = pg.plot(title="График для k")
+    plot_widget2.addLegend()
     plot_widget2.setBackground('w')
     plot_widget2.showGrid(x=True, y=True)
     if not mult_graph_i and not mult_graph_k:
@@ -259,12 +270,12 @@ def button_clicked_2():
         u = compute_krank(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
         ts = np.arange(0, T, T / (K + 1))
         zs = np.arange(0, l, l / (I + 1))
-        plot_widget.plot(ts,  u[:, I-1], pen=pg.mkPen(color=(0, 0, 0)))
-        plot_widget2.plot(zs, u[K-1, :], pen=pg.mkPen(color=(0, 0, 0)))
+        plot_widget.plot(ts, u[:, I-1], pen=pg.mkPen(color=colors[0], width = 3), name = "График при z =" + str(l))
+        plot_widget2.plot(zs, u[K-1, :], pen=pg.mkPen(color=colors[0], width = 3), name = "График при t =" + str(T))
         for j in range(4):
-            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget2.plot(zs, u[int(j * K / 4) + 1, :], pen=pg.mkPen(color=colors[j+1], width = 3), name = "График при t =" + str(T*int(j * K / 4)/K))
         for j in range(4):
-            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=(0, 0, 0)))
+            plot_widget.plot(ts, u[:, int(j * I / 4) + 1], pen=pg.mkPen(color=colors[j+1], width = 3), name = "График при z =" + str(l*int(j * I / 4)/I))
 
 
 def test_cranck_button():
@@ -372,18 +383,121 @@ def shod_cranck_button():
     axes.legend()
     fig.show()
 
+def visual_convergence():
+    c = 1.35
+    l = 5
+    k_thermal_cond = 0.065
+    alpha = 0.008
+    T = 150
+    beta = 0.1
+    R = 3
+    u_0 = 0
+    p = 60
+    a = 0.1 * R
+    if form.lineEdit.text() != '':
+        l = float(form.lineEdit.text())
+    if form.lineEdit_2.text() != '':
+        R = float(form.lineEdit_2.text())
+    if form.lineEdit_3.text() != '':
+        beta = float(form.lineEdit_3.text())
+    if form.lineEdit_4.text() != '':
+        k_thermal_cond = float(form.lineEdit_4.text())
+    if form.lineEdit_5.text() != '':
+        c = float(form.lineEdit_5.text())
+    if form.lineEdit_6.text() != '':
+        alpha = float(form.lineEdit_6.text())
+    if form.lineEdit_7.text() != '':
+        T = float(form.lineEdit_7.text())
+    if form.lineEdit_8.text() != '':
+        u_0 = float(form.lineEdit_8.text())
+    if form.lineEdit_13.text() != '':
+        p = float(form.lineEdit_13.text())
+    if form.lineEdit_14.text() != '':
+        a = float(form.lineEdit_14.text()) * R
+    I = 5
+    K = 10
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    for i in range(10):
+        u = compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
+        for_i_xs = np.linspace(0, T, K + 1)
+        for_i_us = u[:, I // 2]
+        for_n_xs = np.linspace(0, l, I + 1)
+        for_n_us = u[K // 2, :]
+        axes[0].plot(for_i_xs, for_i_us, label='I = ' + str(I) + ', K = ' + str(K))
+        axes[1].plot(for_n_xs, for_n_us, label='I = ' + str(I) + ', K = ' + str(K))
+        I *= 2
+        K *= 2
+    name_0 = "Распределение температуры в точке z={:4.2f} см".format(l / 2)
+    name_1 = "Распределение температуры в момент времени t={:4.2f} с".format(T / 2)
+    axes[0].set(title=name_0, xlabel="Время, с", ylabel="Темпераура, град")
+    axes[1].set(title=name_1, xlabel="Расстояние, см", ylabel="Темпераура, град")
+    axes[0].grid()
+    axes[1].grid()
+    axes[0].legend()
+    axes[1].legend()
+    fig.show()
+def test_level_convergence():
+    c = 1.35
+    l = 5
+    k_thermal_cond = 0.065
+    alpha = 0.008
+    T = 150
+    beta = 0.1
+    R = 3
+    u_0 = 0
+    p = 60
+    a = 0.1 * R
+    if form.lineEdit.text() != '':
+        l = float(form.lineEdit.text())
+    if form.lineEdit_2.text() != '':
+        R = float(form.lineEdit_2.text())
+    if form.lineEdit_3.text() != '':
+        beta = float(form.lineEdit_3.text())
+    if form.lineEdit_4.text() != '':
+        k_thermal_cond = float(form.lineEdit_4.text())
+    if form.lineEdit_5.text() != '':
+        c = float(form.lineEdit_5.text())
+    if form.lineEdit_6.text() != '':
+        alpha = float(form.lineEdit_6.text())
+    if form.lineEdit_7.text() != '':
+        T = float(form.lineEdit_7.text())
+    if form.lineEdit_8.text() != '':
+        u_0 = float(form.lineEdit_8.text())
+    if form.lineEdit_13.text() != '':
+        p = float(form.lineEdit_13.text())
+    if form.lineEdit_14.text() != '':
+        a = float(form.lineEdit_14.text()) * R
+    I = 100
+    K = 10
+    fig, axes = plt.subplots(nrows=1, ncols=1)
+    us = []
+    for i in range(13):
+        u = compute_implicit(I, k_thermal_cond, alpha, c, l, T, K, u_0, R, beta, p, a)
+        for_i_xs = np.linspace(0, l, I + 1)
+        for_i_us = u[K // 2, :]
+        axes.plot(for_i_xs, for_i_us, label='K = ' + str(K))
+        us.append(u[K // 2, I // 2])
+        print("\nh_t = " + str(T / K))
+        print("u_ht = " + str(us[-1]) + "\n")
+        K *= 2
+    name_0 = "Распределение температуры в точке z={:4.2f} см".format(l / 2)
+    axes.set(title=name_0, xlabel="Время, с", ylabel="Темпераура, град")
+    axes.grid()
+    axes.legend()
+    fig.show()
 
 
 
-
-Form, Window = uic.loadUiType('interface.ui')
+Form, Window = uic.loadUiType('D:\PythonProjects\\nmmp\interface.ui')
 app = QApplication([])
 window = Window()
 form = Form()
 form.setupUi(window)
 form.pushButton.clicked.connect(button_clicked)
 form.pushButton_2.clicked.connect(button_clicked_2)
+form.pushButton_3.clicked.connect(visual_convergence)
 form.pushButton_4.clicked.connect(test_cranck_button)
+form.pushButton_5.clicked.connect(test_level_convergence)
 form.pushButton_6.clicked.connect(shod_cranck_button)
 window.show()
 app.exec_()
